@@ -43,7 +43,7 @@ def generate_page(from_path, template_path, dest_path, base_path):
   content_html = markdown_to_html_node(content).to_html()
   title_html = extract_title(content)
 
-  generated_html = template.replace("{{ Content }}", content_html).replace("{{ Title }}", title_html).replace("{{href=\"/}}", f"{{href=\"{base_path}\"}}").replace("{{src=\"/}}", f"{{src=\"{base_path}\"}}")
+  generated_html = template.replace("{{ Content }}", content_html).replace("{{ Title }}", title_html).replace("href=\"/", f"{{href=\"{base_path}\"}}").replace("src=\"/", f"{{src=\"{base_path}\"}}")
 
   write_file(dest_path, generated_html)
 
@@ -60,6 +60,7 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, bas
 
 def main():
   base_path = argv[1] if len(argv) > 1 else "/"
+  print(f"Using base path: {base_path}")
 
   print("Cleaning docs directory...")
   rmtree("docs", ignore_errors=True)
