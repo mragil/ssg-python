@@ -1,6 +1,6 @@
 from shutil import rmtree, copy
 from os import mkdir, listdir, path, makedirs
-
+from sys import argv
 from markdown_helper import markdown_to_html_node, extract_title
 
 
@@ -34,7 +34,7 @@ def write_file(file_path, content):
   with open(str(file_path), mode="w", encoding="utf-8") as file:
     file.write(content)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
   print(f"Generating page from {from_path} to {dest_path} using template {template_path}")
 
   content = read_file(from_path)
@@ -43,28 +43,30 @@ def generate_page(from_path, template_path, dest_path):
   content_html = markdown_to_html_node(content).to_html()
   title_html = extract_title(content)
 
-  generated_html = template.replace("{{ Content }}", content_html).replace("{{ Title }}", title_html)
+  generated_html = template.replace("{{ Content }}", content_html).replace("{{ Title }}", title_html).replace("{{href=\"/}}", f"{{href=\"{base_path}\"}}").replace("{{src=\"/}}", f"{{src=\"{base_path}\"}}")
 
   write_file(dest_path, generated_html)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, base_path):
   for item in listdir(dir_path_content):
     src_path = path.join(dir_path_content, item)
     dst_path = path.join(dest_dir_path, item)
 
     if path.isdir(src_path):
-      generate_pages_recursive(src_path, template_path, dst_path)
+      generate_pages_recursive(src_path, template_path, dst_path, base_path)
     elif src_path.endswith(".md"):
       dst_path = dst_path[:-3] + ".html"
-      generate_page(src_path, template_path, dst_path)
+      generate_page(src_path, template_path, dst_path, base_path)
 
 def main():
-  print("Cleaning public directory...")
-  rmtree("public", ignore_errors=True)
+  base_path = argv[1] if len(argv) > 1 else "/"
 
-  copy_directory("static", "public")
-  
-  generate_pages_recursive("content", "template.html", "public")
+  print("Cleaning docs directory...")
+  rmtree("docs", ignore_errors=True)
+
+  copy_directory("static", "docs")
+
+  generate_pages_recursive("content", "template.html", "docs", base_path)
 
 
 main()
