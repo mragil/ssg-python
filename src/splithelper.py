@@ -44,7 +44,8 @@ def split_nodes_image(old_nodes):
     continue_at = 0
 
     for i in range(len(old_node.text)):
-      if old_node.text[i] == "!" and old_node.text[i + 1] == "[" and start_tag_at is None:
+
+      if old_node.text[i] == "!" and (len(old_node.text) > i + 1 and old_node.text[i + 1] == "[") and start_tag_at is None:
         start_tag_at = i
       elif old_node.text[i] == ")" and start_tag_at is not None:
         new_nodes.append(TextNode(old_node.text[continue_at:start_tag_at], TextType.TEXT))
